@@ -41,24 +41,24 @@ class Profile(models.Model):
     phone_regex = RegexValidator(regex=r'^\+?1?\d{9,10}$', message="Phone Number Must be 10 Digit.")
     phone_number = models.CharField(validators=[phone_regex], max_length=10, null=True, blank=True)
     GENDER_CHOICES = [('M', 'Male',), ('F', 'Female',), ('O', 'Others',)]
-    gender = models.CharField(max_length=1, choices=GENDER_CHOICES, default='1', null=False, blank=False)
+    gender = models.CharField(max_length=1, choices=GENDER_CHOICES, default='1', null=True, blank=True)
     profile_pic = models.ImageField(upload_to='media/', default='no-img.jpg', null=True, blank=True)
-    dob = models.DateField()
+    dob = models.DateField(null=True, blank=True)
     permanent_add = models.OneToOneField(Address, related_name='profile_perm_add', on_delete=models.CASCADE,
-                                         null=False, blank=False)
+                                         null=True, blank=True)
     current_add = models.OneToOneField(Address, related_name='profile_curr_add', on_delete=models.CASCADE,
-                                       null=False, blank=False)
+                                       null=True, blank=True)
     friends = models.ManyToManyField('self', blank=True)
 
-    def save(self):
-        super().save()
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
 
         img = Image.open(self.profile_pic.path)
 
         if img.height > 150 or img.width > 150:
             new_img = (150, 150)
             img.thumbnail(new_img)
-            img.save(self.profile_pic.path)
+            img.save(self.profile_pic.path, *args, **kwargs)
 
     def __str__(self):
         return f'{self.user.username}'
